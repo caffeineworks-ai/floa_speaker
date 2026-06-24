@@ -33,11 +33,13 @@ Cloudflare KV  ("state" 키)
 
 ## 시작하기
 
-### 1. 가상 기기 HTML 수정 (✏️ 핵심 수정 파일)
+### 1. 브랜드 웹페이지 제작 (✏️ 핵심 수정 파일)
 
-`floa_virtual.html` 에서 두 곳을 수정합니다.
+`index.html`을 팀의 브랜드 페이지로 교체하세요. 현재는 placeholder가 들어 있습니다.
 
-**① 제품 정보** — `<script id="product-info">` 블록을 팀 기획에 맞게 편집
+GitHub Pages 주소: `https://{GitHub 유저명}.github.io/floa_speaker/`
+
+**제품 정보도 함께 수정** — `floa_virtual.html` 안의 `<script id="product-info">` 블록을 팀 기획에 맞게 편집하세요.
 ```json
 {
   "name": "FLOA",
@@ -48,11 +50,6 @@ Cloudflare KV  ("state" 키)
 }
 ```
 Claude가 제품 정보를 물어보면 이 JSON을 읽어서 답합니다.
-
-**② Worker URL** — 아래 주소로 교체
-```javascript
-const MCP_WORKER_URL = "https://floa-speaker.typica-918.workers.dev";
-```
 
 ### 2. GitHub Pages 활성화
 
