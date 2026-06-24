@@ -21,6 +21,7 @@ Cloudflare KV  ("state" 키)
 
 | Tool | 설명 |
 |---|---|
+| `get_product_info` | 제품 정보 조회 |
 | `get_speaker_state` | 현재 상태 조회 |
 | `set_power` | 전원 ON/OFF |
 | `set_playback` | 재생 / 일시정지 |
@@ -30,26 +31,9 @@ Cloudflare KV  ("state" 키)
 | `change_playlist` | 다음/이전 재생목록 이동 |
 | `send_message` | Push Messages 패널에 메시지 전송 |
 
-## 배포 절차
+## 시작하기
 
-### 1. KV 네임스페이스 생성
-```bash
-npx wrangler kv namespace create FLOA_KV
-```
-출력된 `id` 값을 `wrangler.toml`의 `id = "KV_네임스페이스_ID"` 부분에 붙여넣기.
-
-### 2. GitHub 리포지토리 생성 및 Secrets 등록
-- `CF_API_TOKEN`: Cloudflare → My Profile → API Tokens → Edit Cloudflare Workers
-- `CF_ACCOUNT_ID`: Cloudflare → Workers & Pages → 우측 Account ID
-
-### 3. main 브랜치에 push → 자동 배포
-```bash
-git init && git add . && git commit -m "init"
-git remote add origin https://github.com/YOUR/REPO.git
-git push -u origin main
-```
-
-### 4. 가상 기기 HTML 수정 (✏️ 핵심 수정 파일)
+### 1. 가상 기기 HTML 수정 (✏️ 핵심 수정 파일)
 
 `floa_virtual.html` 에서 두 곳을 수정합니다.
 
@@ -65,23 +49,22 @@ git push -u origin main
 ```
 Claude가 제품 정보를 물어보면 이 JSON을 읽어서 답합니다.
 
-**② Worker URL** — 자신의 Cloudflare 배포 주소로 교체
+**② Worker URL** — 아래 주소로 교체
 ```javascript
-const MCP_WORKER_URL = "https://floa-speaker.YOUR_ACCOUNT.workers.dev";
+const MCP_WORKER_URL = "https://floa-speaker.typica-918.workers.dev";
 ```
 
-### 5. index.ts에서 GitHub Pages URL 설정
+### 2. GitHub Pages 활성화
 
-`src/index.ts` 상단의 `VIRTUAL_DEVICE_URL`을 자신의 GitHub Pages 주소로 교체:
-```typescript
-const VIRTUAL_DEVICE_URL =
-  "https://YOUR_GITHUB_USERNAME.github.io/floa_speaker/floa_virtual.html";
-```
-> GitHub Pages 활성화: 레포 Settings → Pages → Branch: main, folder: / (root)
+레포 Settings → Pages → Branch: main, folder: / (root)
 
-### 6. claude.ai 커넥터 연결
+`floa_virtual.html` 접속 주소:
+`https://{GitHub 유저명}.github.io/floa_speaker/floa_virtual.html`
+
+### 3. claude.ai 커넥터 연결
+
 Settings → Integrations → Add custom integration
-URL: `https://floa-speaker.YOUR_ACCOUNT.workers.dev/mcp`
+URL: `https://floa-speaker.typica-918.workers.dev/mcp`
 
 ## 사용 예시 (Claude에게 말하기)
 
@@ -92,3 +75,4 @@ URL: `https://floa-speaker.YOUR_ACCOUNT.workers.dev/mcp`
 - "재생 시작해"
 - "지금 상태 알려줘"
 - "스피커에 '안녕하세요!' 메시지 보내줘"
+- "이 제품 어떤 제품이야?"
