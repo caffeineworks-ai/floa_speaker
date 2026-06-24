@@ -69,7 +69,7 @@ export class FloaMCP extends McpAgent {
     // ✏️ 학생 수정 포인트: 아래 VIRTUAL_DEVICE_URL을 자신의 GitHub Pages 주소로 교체하세요.
     // 형식: https://{GitHub 유저명}.github.io/{레포명}/floa_virtual.html
     const VIRTUAL_DEVICE_URL =
-      "https://YOUR_GITHUB_USERNAME.github.io/floa_speaker/floa_virtual.html";
+      "https://caffeineworks-ai.github.io/floa_speaker/floa_virtual.html";
 
     this.server.tool(
       "get_product_info",
