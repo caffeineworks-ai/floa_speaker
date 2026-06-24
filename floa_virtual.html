@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLOA Virtual Device Mockup</title>
+
+    <!--
+    ✏️ 학생 수정 포인트 (1/2) — 제품 정보
+    아래 JSON을 팀의 제품 기획에 맞게 수정하세요.
+    Claude가 "이 제품이 뭐야?"라고 물으면 이 내용을 읽어서 답합니다.
+    -->
+    <script id="product-info" type="application/json">
+    {
+      "name": "FLOA",
+      "tagline": "물 위에 떠서 음악을 재생하는 스피커입니다.",
+      "description": "FLOA는 방수 설계로 욕조, 수영장, 강가 등 물 위에 띄워서 사용할 수 있는 스피커입니다. 물에 닿는 순간 자동으로 전원이 켜지며, 스마트폰이나 PC에서 Claude를 통해 볼륨·재생목록·재생 상태를 원격으로 제어할 수 있습니다.",
+      "features": [
+        "IPX7 방수 등급",
+        "물 위에서 자동 전원 ON",
+        "Claude MCP를 통한 원격 제어",
+        "2가지 내장 재생목록"
+      ],
+      "spec": {
+        "battery": "TODO: 배터리 지속시간",
+        "price": "TODO: 가격",
+        "buyUrl": "TODO: 구매 링크"
+      }
+    }
+    </script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --accent-red: #ff3b30;
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --line-color: #e5e5ea;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 상단 로고 */
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            color: var(--text-main);
+            text-transform: lowercase;
+        }
+
+        /* 단순화된 스피커 그래픽 영역 */
+        .display-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        /* 하단 컨트롤 대시보드 (박스 제거, 여백으로만 구분) */
+        .dashboard {
+            width: 100%;
+            max-width: 800px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard { 
+                grid-template-columns: 1fr; 
+                gap: 40px;
+            }
+        }
+
+        /* 조작부 타이틀 */
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 8px;
+        }
+
+        /* 각 조작 요소 행 */
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            height: 35px;
+        }
+
+        .control-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* 미니멀 토글 스위치 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e5ea; transition: .2s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .2s; border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider { background-color: var(--accent-red); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* 볼륨 및 재생목록 버튼 */
+        .volume-controls, .playlist-zone { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .volume-slider { 
+            accent-color: var(--accent-red); 
+            width: 90px; 
+        }
+        
+        .btn {
+            background: none; 
+            border: 1px solid var(--line-color); 
+            padding: 5px 12px; 
+            border-radius: 6px;
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .btn:hover { 
+            background: #f2f2f7; 
+            border-color: var(--text-muted);
+        }
+
+        #playlist-name { 
+            font-size: 0.9rem; 
+            font-weight: 500;
+        }
+
+        /* 우하단 메시지 박스 (테두리 최소화, 배경 투명) */
+        .log-box {
+            width: 100%;
+            height: 220px;
+            border: 1px solid var(--line-color);
+            border-radius: 8px;
+            background: transparent;
+            padding: 12px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #48484a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo">floa</div>
+
+    <div class="display-container">
+        <svg width="300" height="150" viewBox="0 0 300 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="10" y1="100" x2="290" y2="100" stroke="#1d1d1f" stroke-width="1.5" />
+            
+            <path d="M 80 100 C 100 125, 200 125, 220 100 Z" fill="#ff3b30" />
+            
+            <path d="M 60 100 L 240 100" stroke="#ff3b30" stroke-width="5" stroke-linecap="round" />
+            
+            <path d="M 100 55 L 200 55 L 215 95 L 85 95 Z" fill="#ff3b30" />
+        </svg>
+    </div>
+
+    <div class="dashboard">
+        
+        <div>
+            <h3 class="section-title">Device Controls</h3>
+            
+            <div class="control-group">
+                <span class="control-label">전원 (Power)</span>
+                <label class="switch">
+                    <input type="checkbox" id="power-switch" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-group">
+                <span class="control-label">재생 상태 (Playback)</span>
+                <label class="switch">
+                    <input type="checkbox" id="play-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-group">
+                <span class="control-label">볼륨 (<span id="vol-txt">50</span>%)</span>
+                <div class="volume-controls">
+                    <button class="btn" id="btn-vol-down">▼</button>
+                    <input type="range" id="vol-slider" class="volume-slider" min="0" max="100" value="50">
+                    <button class="btn" id="btn-vol-up">▲</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <span class="control-label">재생목록</span>
+                <div class="playlist-zone">
+                    <button class="btn" id="btn-prev">이전</button>
+                    <span id="playlist-name">목록 1: Chill Jazz</span>
+                    <button class="btn" id="btn-next">다음</button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="section-title">Push Messages</h3>
+            <div class="log-box" id="msg-log">
+                </div>
+        </div>
+    </div>
+
+    <audio id="audio-player" loop></audio>
+
+    <script>
+        const playlists = [
+            { name: "목록 1: Chill Jazz", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+            { name: "목록 2: Sunset Pop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
+        ];
+        
+        let currentTrackIdx = 0;
+
+        const audio = document.getElementById('audio-player');
+        const powerSwitch = document.getElementById('power-switch');
+        const playSwitch = document.getElementById('play-switch');
+        const volSlider = document.getElementById('vol-slider');
+        const volTxt = document.getElementById('vol-txt');
+        const playlistName = document.getElementById('playlist-name');
+        const logBox = document.getElementById('msg-log');
+
+        audio.src = playlists[currentTrackIdx].url;
+        audio.volume = volSlider.value / 100;
+
+        powerSwitch.addEventListener('change', () => {
+            if(!powerSwitch.checked) {
+                playSwitch.checked = false;
+                audio.pause();
+                playSwitch.disabled = true;
+            } else {
+                playSwitch.disabled = false;
+            }
+        });
+
+        playSwitch.addEventListener('change', () => {
+            if(playSwitch.checked && powerSwitch.checked) {
+                audio.play().catch(e => console.log("상호작용 후 재생 가능"));
+            } else {
+                audio.pause();
+            }
+        });
+
+        function updateVolume(val) {
+            let v = Math.max(0, Math.min(100, val));
+            volSlider.value = v;
+            volTxt.innerText = v;
+            audio.volume = v / 100;
+        }
+        volSlider.addEventListener('input', (e) => updateVolume(e.target.value));
+        document.getElementById('btn-vol-up').addEventListener('click', () => updateVolume(parseInt(volSlider.value) + 10));
+        document.getElementById('btn-vol-down').addEventListener('click', () => updateVolume(parseInt(volSlider.value) - 10));
+
+        function changePlaylist(direction) {
+            currentTrackIdx = (currentTrackIdx + direction + playlists.length) % playlists.length;
+            playlistName.innerText = playlists[currentTrackIdx].name;
+            audio.src = playlists[currentTrackIdx].url;
+            
+            if(playSwitch.checked && powerSwitch.checked) {
+                audio.play();
+            }
+        }
+        document.getElementById('btn-prev').addEventListener('click', () => changePlaylist(-1));
+        document.getElementById('btn-next').addEventListener('click', () => changePlaylist(1));
+
+        // 가상 기기 메시지 수신 함수
+        function pushDeviceMessage(msg) {
+            const time = new Date().toLocaleTimeString();
+            logBox.innerHTML += `<div>[${time}] ${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // ── MCP Worker 폴링 ─────────────────────────────────────────────────
+        // ✏️ 학생 수정 포인트 (2/2) — 배포 후 자신의 Worker URL로 교체하세요
+        // 형식: https://floa-speaker.{Cloudflare 계정명}.workers.dev
+        const MCP_WORKER_URL = "https://floa-speaker.YOUR_ACCOUNT.workers.dev";
+        let lastStateStr = "";
+
+        function applyState(state) {
+            // 전원
+            if (typeof state.power === "boolean") {
+                powerSwitch.checked = state.power;
+                playSwitch.disabled = !state.power;
+                if (!state.power) {
+                    playSwitch.checked = false;
+                    audio.pause();
+                }
+            }
+            // 재생
+            if (typeof state.playing === "boolean") {
+                const wasPlaying = playSwitch.checked;
+                playSwitch.checked = state.playing && powerSwitch.checked;
+                if (playSwitch.checked && !wasPlaying) {
+                    audio.play().catch(() => {});
+                } else if (!playSwitch.checked) {
+                    audio.pause();
+                }
+            }
+            // 볼륨
+            if (typeof state.volume === "number") {
+                updateVolume(state.volume);
+            }
+            // 재생목록
+            if (typeof state.playlistIndex === "number") {
+                const idx = state.playlistIndex;
+                if (idx !== currentTrackIdx) {
+                    currentTrackIdx = idx;
+                    playlistName.innerText = playlists[idx]?.name ?? "";
+                    audio.src = playlists[idx]?.url ?? "";
+                    if (playSwitch.checked && powerSwitch.checked) {
+                        audio.play().catch(() => {});
+                    }
+                }
+            }
+            // 메시지
+            if (state.message) {
+                pushDeviceMessage(state.message);
+            }
+        }
+
+        async function pollState() {
+            try {
+                const res = await fetch(MCP_WORKER_URL + "/state");
+                if (!res.ok) return;
+                const text = await res.text();
+                if (text === "{}" || text === lastStateStr) return;
+                lastStateStr = text;
+                applyState(JSON.parse(text));
+            } catch (e) {
+                // 연결 실패는 조용히 무시 (Worker URL 미설정 상태)
+            }
+        }
+
+        // 페이지 로드 후 2초 간격으로 상태 폴링 시작
+        setInterval(pollState, 2000);
+    </script>
+</body>
+</html>

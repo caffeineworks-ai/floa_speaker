@@ -1,0 +1,16 @@
+name = "floa-speaker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "FLOA_KV"
+id = "KV_네임스페이스_ID"   # npx wrangler kv namespace create FLOA_KV 실행 후 출력된 id로 교체
+
+[[durable_objects.bindings]]
+name = "MCP_OBJECT"
+class_name = "FloaMCP"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["FloaMCP"]
